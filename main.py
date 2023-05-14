@@ -5,6 +5,8 @@ import json
 import threading
 
 home = os.path.expanduser('~')
+music_dir = os.path.join(home, "Music")
+songs_file = os.path.join(music_dir, "songs.json")
 app = Flask(__name__)
 
 ydl_opts = {
@@ -17,8 +19,7 @@ ydl_opts = {
 
 
 def download(id, category):
-    ydl_opts["paths"]["home"] = os.path.join(
-        home, "Music", category.capitalize())
+    ydl_opts["paths"]["home"] = os.path.join(music_dir, category)
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([f"https://youtube.com/watch?v={id}"])
@@ -30,13 +31,13 @@ def restore():
 
 
 def getSongs():
-    with open("songs.json", "r") as f:
+    with open(songs_file, "r") as f:
         return json.load(f)
 
 
 def addSong(id, category):
     songs = getSongs() + {"id": id, "category": category}
-    with open("songs.json", "w") as f:
+    with open(songs_file, "w") as f:
         json.dump(songs, f)
 
 
