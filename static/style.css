@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --base: #232136;
+    --surface: #1f1d2e;
+    --text: #e0def4;
+    --accent: #ea9a97;
+    --filter: invert(71%) sepia(8%) saturate(1891%) hue-rotate(314deg) brightness(97%) contrast(90%);
+}
+
+html {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--base);
+    color: var(--text);
+}
+
+body {
+    height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+input[type="text"] {
+    padding: 1rem 1rem;
+    border-radius: 0.5rem;
+    outline: none;
+    border: none;
+    width: 24rem;
+    max-width: 80vw;
+}
+
+input[type="submit"] {
+    margin-top: 0.5rem;
+    padding: 0.8rem 1rem;
+    background-color: var(--accent);
+    color: var(--base);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
