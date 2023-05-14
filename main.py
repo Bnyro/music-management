@@ -29,9 +29,12 @@ def download(id, category):
         ydl.download([f"https://youtube.com/watch?v={id}"])
 
 
-def restore():
-    for song in getSongs():
-        download(song["id"], song["category"])
+def restore(start):
+    for song in getSongs()[start:]:
+        try:
+            download(song["id"], song["category"])
+        except:
+            continue
 
 
 def getSongs():
@@ -84,7 +87,6 @@ def AddSong():
     if request.method == 'POST':
         id = request.form.get("id")[-11:]
         category = request.form.get("category")
-        print(getSongs())
         if not any(song["id"] == id for song in getSongs()):
             addSong(id, category)
             thread = threading.Thread(target=download, args=(id, category))
@@ -105,7 +107,8 @@ def GetCategories():
 
 @app.route('/restore')
 def RestoreAll():
-    thread = threading.Thread(target=restore)
+    start = request.args.get("start", "0")
+    thread = threading.Thread(target=restore, args=(int(start),))
     thread.start()
     return jsonify({"message": "Started"})
 
