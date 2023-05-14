@@ -18,6 +18,10 @@ ydl_opts = {
 }
 
 
+def unique(items):
+    return list(set(items))
+
+
 def download(id, category):
     ydl_opts["paths"]["home"] = os.path.join(music_dir, category)
 
@@ -35,8 +39,27 @@ def getSongs():
         return json.load(f)
 
 
+def getCategories():
+    categories = unique([song["category"] for song in getSongs()])
+    categories.sort()
+    return categories
+
+
+def getDownloadedSongs():
+    songs = []
+    categories = getCategories()
+    for category in categories:
+        dir = os.path.join(music_dir, category)
+        if not os.path.exists(dir):
+            continue
+        for file in os.listdir(dir):
+            songs.append({"name": file, "category": category})
+    return {"categories": categories, "downloads": songs}
+
+
 def addSong(id, category):
-    songs = getSongs() + {"id": id, "category": category}
+    songs = getSongs()
+    songs.append({"id": id, "category": category})
     with open(songs_file, "w") as f:
         json.dump(songs, f)
 
@@ -46,22 +69,38 @@ def SendStatic(path):
     return send_from_directory('static', path)
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/files/<path:path>')
+def SendFiles(path):
+    return send_from_directory(music_dir, path)
+
+
+@app.route("/")
 def GetHome():
+    return render_template('songs.html', songs=getDownloadedSongs())
+
+
+@app.route('/add', methods=['POST', 'GET'])
+def AddSong():
     if request.method == 'POST':
         id = request.form.get("id")[-11:]
         category = request.form.get("category")
+        print(getSongs())
         if not any(song["id"] == id for song in getSongs()):
             addSong(id, category)
             thread = threading.Thread(target=download, args=(id, category))
             thread.start()
 
-    return render_template('index.html')
+    return render_template('add.html')
 
 
 @app.route('/api')
 def GetAll():
     return jsonify(getSongs())
+
+
+@app.route('/api/categories')
+def GetCategories():
+    return jsonify(getCategories())
 
 
 @app.route('/restore')
