@@ -13,8 +13,12 @@ ydl_opts = {
     'format': 'opus/bestaudio/best',
     'paths': {'home': ''},
     'outtmpl': '%(title)s.%(ext)s',
-    'quiet': True,
-    'extractaudio': True
+    'extractaudio': True,
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'opus',
+        'preferredquality': '192',
+    }],
 }
 
 
