@@ -71,6 +71,12 @@ def addSong(id, category):
         json.dump(songs, f)
 
 
+def startRestore(songs):
+    thread = threading.Thread(target=restore, args=(songs,))
+    thread.start()
+    return jsonify({"message": "Started"})
+
+
 @app.route('/static/<path:path>')
 def SendStatic(path):
     return send_from_directory('static', path)
@@ -113,15 +119,13 @@ def GetCategories():
 def RestoreAll():
     start = request.args.get("start", "0")
     songs = getSongs()[int(start):]
-    thread = threading.Thread(target=restore, args=(songs,))
-    thread.start()
-    return jsonify({"message": "Started"})
+    return startRestore(songs)
 
 
 @app.route('/restore/<category>')
 def RestoreByCategory(category):
     songs = [song for song in getSongs() if song.category == category]
-    restore(songs)
+    return startRestore(songs)
 
 
 if __name__ == '__main__':
