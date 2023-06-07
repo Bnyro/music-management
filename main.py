@@ -124,7 +124,7 @@ def RestoreAll():
 
 @app.route('/restore/<category>')
 def RestoreByCategory(category):
-    songs = [song for song in getSongs() if song.category == category]
+    songs = [song for song in getSongs() if song["category"] == category]
     return startRestore(songs)
 
 
