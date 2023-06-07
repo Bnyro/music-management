@@ -33,8 +33,8 @@ def download(id, category):
         ydl.download([f"https://youtube.com/watch?v={id}"])
 
 
-def restore(start):
-    for song in getSongs()[start:]:
+def restore(songs):
+    for song in songs:
         try:
             download(song["id"], song["category"])
         except:
@@ -112,9 +112,16 @@ def GetCategories():
 @app.route('/restore')
 def RestoreAll():
     start = request.args.get("start", "0")
-    thread = threading.Thread(target=restore, args=(int(start),))
+    songs = getSongs()[int(start):]
+    thread = threading.Thread(target=restore, args=(songs,))
     thread.start()
     return jsonify({"message": "Started"})
+
+
+@app.route('/restore/<category>')
+def RestoreByCategory(category):
+    songs = [song for song in getSongs() if song.category == category]
+    restore(songs)
 
 
 if __name__ == '__main__':
