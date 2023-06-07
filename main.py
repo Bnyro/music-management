@@ -12,7 +12,7 @@ app = Flask(__name__)
 ydl_opts = {
     'format': 'opus/bestaudio/best',
     'paths': {'home': ''},
-    'outtmpl': '%(title)s.%(ext)s',
+    'outtmpl': '%(title)s [%(id)s].%(ext)s',
     'extractaudio': True,
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
