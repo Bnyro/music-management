@@ -1,14 +1,20 @@
 from yt_dlp import YoutubeDL
 from flask import Flask, jsonify, request, send_from_directory, render_template
 import os
-import json
 import threading
 
+# Create and init the needed folder structure
 home = os.path.expanduser('~')
 music_dir = os.path.join(home, "Music")
-songs_file = os.path.join(music_dir, "songs.json")
-app = Flask(__name__)
+src_dir = os.path.join(music_dir, "src")
 
+# Create directories that do not yet exist
+for directory in (music_dir, src_dir):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+# Configuration for yt-dlp
 ydl_opts = {
     'format': 'opus/bestaudio/best',
     'paths': {'home': ''},
@@ -22,8 +28,7 @@ ydl_opts = {
 }
 
 
-def unique(items):
-    return list(set(items))
+app = Flask(__name__)
 
 
 def download(id, category):
@@ -37,19 +42,36 @@ def restore(songs):
     for song in songs:
         try:
             download(song["id"], song["category"])
-        except:
+        except Exception:
             continue
 
 
-def getSongs():
-    with open(songs_file, "r") as f:
-        return json.load(f)
-
-
 def getCategories():
-    categories = unique([song["category"] for song in getSongs()])
+    categories = []
+
+    for filename in os.listdir(src_dir):
+        path = os.path.join(src_dir, filename)
+        if os.path.isfile(path):
+            categories.append(filename)
+
     categories.sort()
     return categories
+
+
+def getSongs():
+    songs = []
+
+    for category in getCategories():
+        with open(os.path.join(src_dir, category), "r") as f:
+            for videoId in f.readlines():
+                songs.append(
+                    {
+                        'category': category,
+                        'id': videoId,
+                    }
+                )
+
+    return songs
 
 
 def getDownloadedSongs():
@@ -65,10 +87,8 @@ def getDownloadedSongs():
 
 
 def addSong(id, category):
-    songs = getSongs()
-    songs.append({"id": id, "category": category})
-    with open(songs_file, "w") as f:
-        json.dump(songs, f)
+    with open(os.path.join(src_dir, category), "a") as f:
+        f.write(f"{id}\n")
 
 
 def startRestore(songs):
