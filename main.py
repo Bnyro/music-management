@@ -107,12 +107,7 @@ def SendFiles(path):
     return send_from_directory(music_dir, path)
 
 
-@app.route("/")
-def GetHome():
-    return render_template('songs.html', songs=getDownloadedSongs())
-
-
-@app.route('/add', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def AddSong():
     if request.method == 'POST':
         id = request.form.get("id")[-11:]
@@ -123,6 +118,11 @@ def AddSong():
             thread.start()
 
     return render_template('add.html')
+
+
+@app.route("/play")
+def GetPlayer():
+    return render_template('songs.html', songs=getDownloadedSongs())
 
 
 @app.route('/api')
