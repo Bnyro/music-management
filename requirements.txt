@@ -1,3 +1,4 @@
 yt_dlp
+ffmpeg
 Flask
 gunicorn

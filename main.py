@@ -149,5 +149,4 @@ def RestoreByCategory(category):
 
 
 if __name__ == '__main__':
-    # Run with `gunicorn main:app -b 127.0.0.1:5000` in production
     app.run(debug=True)
