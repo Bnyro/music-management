@@ -63,7 +63,7 @@ def getSongs():
 
     for category in getCategories():
         with open(os.path.join(src_dir, category), "r") as f:
-            for videoId in f.readlines():
+            for videoId in f.read().splitlines():
                 songs.append(
                     {
                         'category': category,
