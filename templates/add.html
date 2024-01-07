@@ -36,6 +36,9 @@
 
   // run the request to download/add the video in the background
   $("#add-form").target = "hidden-form";
+  $("#add-form").addEventListener("submit", (e) => {
+    setTimeout(() => ($("#id").value = ""), 50);
+  });
 
   $("#query").addEventListener("keypress", (e) => {
     if (e.key === "Enter") search();
