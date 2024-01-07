@@ -11,11 +11,12 @@
   <body class="flex-even">
     <div id="add-container">
       <h3>Add Song</h3>
-      <form method="post">
+      <form id="add-form" method="post">
         <input type="text" id="id" name="id" placeholder="URL or ID" required />
         <input type="text" name="category" placeholder="Category" required />
         <input type="submit" id="submit" value="Submit" />
       </form>
+      <iframe style="display: none" name="hidden-form"></iframe>
     </div>
 
     <div id="search-container">
@@ -33,7 +34,10 @@
 
   let $ = document.querySelector.bind(document);
 
-  $("#query").addEventListener("keypress", function (e) {
+  // run the request to download/add the video in the background
+  $("#add-form").target = "hidden-form";
+
+  $("#query").addEventListener("keypress", (e) => {
     if (e.key === "Enter") search();
   });
   $("#search").addEventListener("click", (e) => search());
