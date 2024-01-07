@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,12 +8,95 @@
     <link rel="stylesheet" type="text/css" href="./static/style.css" />
     <title>Add song</title>
   </head>
-  <body>
-    <h3>Add Song</h3>
-    <form method="post">
-      <input type="text" name="id" placeholder="URL or ID" required />
-      <input type="text" name="category" placeholder="Category" required />
-      <input type="submit" value="Submit" />
-    </form>
+  <body class="flex-even">
+    <div id="add-container">
+      <h3>Add Song</h3>
+      <form method="post">
+        <input type="text" id="id" name="id" placeholder="URL or ID" required />
+        <input type="text" name="category" placeholder="Category" required />
+        <input type="submit" id="submit" value="Submit" />
+      </form>
+    </div>
+
+    <div id="search-container">
+      <span id="search-row">
+        <input type="text" id="query" placeholder="Search" />
+        <button id="search">Search</button>
+      </span>
+      <div id="results"></div>
+    </div>
   </body>
 </html>
+
+<script>
+  const apiUrl = "https://pipedapi.chatoyer.de";
+
+  let $ = document.querySelector.bind(document);
+
+  $("#query").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") search();
+  });
+  $("#search").addEventListener("click", (e) => search());
+
+  function padTimePart(num) {
+    if (String(num).length > 1) return num;
+    return "0" + num;
+  }
+
+  function formatDuration(duration) {
+    let durationDate = new Date(duration * 1000);
+    return (
+      padTimePart(durationDate.getUTCHours()) +
+      ":" +
+      padTimePart(durationDate.getUTCMinutes()) +
+      ":" +
+      padTimePart(durationDate.getUTCSeconds())
+    );
+  }
+
+  async function search() {
+    const query = $("#query").value;
+
+    if (!query) return;
+
+    const response = await fetch(`${apiUrl}/search?q=${query}&filter=all`);
+    const json_resp = await response.json();
+
+    $("#results").innerHTML = "";
+
+    for (let result of json_resp.items) {
+      if (result.type != "stream" || result.isShort) continue;
+
+      let image = document.createElement("img");
+      image.src = result.thumbnail;
+
+      let title = document.createElement("a");
+      title.innerText = result.title;
+      title.href = `${apiUrl}${result.url}`;
+      title.target = "_blank";
+
+      let info = document.createElement("p");
+      let duration = formatDuration(result.duration);
+      info.innerText =
+        duration + " - " + result.uploaderName + " - " + result.uploadedDate;
+
+      let download = document.createElement("button");
+      download.innerText = "Select";
+      download.addEventListener(
+        "click",
+        () => ($("#id").value = result.url.substr(-11)),
+      );
+
+      let infoContainer = document.createElement("div");
+      infoContainer.appendChild(title);
+      infoContainer.appendChild(info);
+
+      let container = document.createElement("div");
+      container.appendChild(image);
+      container.appendChild(infoContainer);
+      container.appendChild(download);
+
+      $("#results").appendChild(container);
+    }
+  }
+</script>
