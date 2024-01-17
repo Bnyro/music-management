@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -22,7 +22,11 @@
 
       <div id="controls">
         <img id="shuffle" src="static/shuffle.svg" />
-        <img id="play-pause" src="static/play.svg" />
+        <div id="main-controls">
+          <img id="prev" src="static/prev.svg" />
+          <img id="play-pause" src="static/play.svg" />
+          <img id="next" src="static/next.svg" />
+        </div>
         <img id="volume" src="static/volume.svg" />
       </div>
 
@@ -114,8 +118,19 @@
     margin-bottom: -1rem;
   }
 
+  #main-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
   #play-pause {
     height: 5rem;
+  }
+
+  #prev,
+  #next {
+    height: 3rem;
   }
 
   #shuffle,
@@ -145,6 +160,7 @@
   let player = new Audio();
   var playing = false;
   let tracklist = [];
+  let trackIndex = 0;
 
   function toTimeString(seconds) {
     return new Date(seconds * 1000).toISOString().substring(11, 19);
@@ -171,19 +187,37 @@
   };
 
   const play = async (song) => {
+    playing = false;
     player.pause();
+
     player.src = `files/${song.category}/${song.name}`;
-    player.play();
     player.volume = $("#volume-slider").value / 100;
-    playing = true;
     $("#current-song").innerHTML = song.name.replace(".opus", "");
+
+    try {
+      await player.play();
+      playing = true;
+    } catch (_) {
+      // no permissions to start playing yet, hence do nothing
+    }
   };
 
   const shuffleTracklist = (songs) => {
     tracklist = [...songs];
     shuffle(tracklist);
-    player.onended();
+    trackIndex = 0;
+    if (tracklist.length > 0) play(tracklist[0]);
   };
+
+  const playNext = () => {
+    trackIndex = tracklist.length > trackIndex + 1 ? trackIndex + 1 : 0;
+    play(tracklist[trackIndex]);
+  }
+
+  const playPrev = () => {
+    trackIndex = trackIndex > 0 ? trackIndex - 1 : tracklist.length - 1;
+    play(tracklist[trackIndex]);
+  }
 
   data.categories.forEach((category) => {
     const songs = data.downloads.filter((song) => song.category == category);
@@ -224,6 +258,8 @@
     else player.play();
     playing = !playing;
   };
+  $("#next").onclick = () => playNext();
+  $("#prev").onclick = () => playPrev();
 
   $("#volume-slider").onchange = () => {
     if (!player?.currentTime) return;
@@ -235,17 +271,9 @@
       $("#volume-slider").style.visibility === "hidden" ? "visible" : "hidden";
   };
 
-  $("#shuffle").onclick = () => {
-    shuffleTracklist(data.downloads);
-  };
+  $("#shuffle").onclick = () => shuffleTracklist(data.downloads);
 
-  player.onended = () => {
-    playing = false;
-    if (tracklist.length > 0) {
-      let song = tracklist.shift();
-      play(song);
-    }
-  };
+  player.onended = () => playNext();
 
   shuffleTracklist(data.downloads);
 
